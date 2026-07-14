@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Yeni lab bir org altına taşınırsa (ör. llmops-labs) bu satırı güncelle.
+  LLMOPS_COMMON_REPO: Muhammet Ali Varlik/llmops-common
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - name: Checkout memory-lab
+        uses: actions/checkout@v4
+
+      - name: Checkout llmops-common (shared SDK)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.LLMOPS_COMMON_REPO }}
+          path: llmops-common-src
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install llmops-common (editable)
+        run: pip install -e ./llmops-common-src
+
+      - name: Install memory-lab + dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check src/ tests/
+
+      - name: Format check (black)
+        run: black --check src/ tests/
+
+      - name: Type check (mypy, informational)
+        run: mypy src/ || true
+
+      # Her yeni lab'da testler llmops_common bağımlılıklarını (client/logger/
+      # evaluator) mock'lamalı — bu CI hiçbir zaman canlı Ollama/Chroma/MLflow'a
+      # bağlanmamalı. Golden/regresyon testleri (PromptOps Lab gibi) için de
+      # cache'lenmiş response fixture'ları kullan, gerçek LLM çağrısı yapma.
+      - name: Run unit tests
+        run: pytest tests/ -v --tb=short

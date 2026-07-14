@@ -1,0 +1,39 @@
+[project]
+name = "memory-lab"
+version = "0.1.0"
+description = "LLMOps laboratory for testing and evaluating LLM memory strategies."
+requires-python = ">=3.11"
+authors = [
+  { name = "Muhammet Ali Varlik", email = "iletisim.muhammetalivarlik@gmail.com" }
+]
+
+dependencies = [
+  "python-dotenv",
+  "langchain>=0.3,<0.4",
+  "langchain-core>=0.3,<0.4",
+  "langchain-ollama>=0.1.0",
+  "langgraph>=0.2,<0.3",
+  "chromadb>=0.4.0",
+  "streamlit>=1.32.0",
+  "mlflow>=2.10.0",
+  "llmops-common"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "ruff",
+  "black",
+  "mypy"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
