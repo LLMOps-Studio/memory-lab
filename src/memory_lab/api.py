@@ -4,6 +4,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.messages import HumanMessage
+from llmops_common.observability.instrumentation import instrument_app
 from pydantic import BaseModel
 
 from memory_lab.agents.graph import build_memory_graph
@@ -13,6 +14,7 @@ app = FastAPI(
     description="LLMOps laboratory for testing context retention and conversational memory.",
     version="0.1.0",
 )
+instrument_app(app)
 
 app.add_middleware(
     CORSMiddleware,
