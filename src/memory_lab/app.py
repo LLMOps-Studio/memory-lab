@@ -1,6 +1,7 @@
-import streamlit as st
 import uuid
-from langchain_core.messages import HumanMessage, AIMessage
+
+import streamlit as st
+from langchain_core.messages import AIMessage, HumanMessage
 
 from memory_lab.agents.graph import build_memory_graph
 from memory_lab.memory.feedback_db import FeedbackDB
@@ -11,10 +12,12 @@ st.set_page_config(page_title="Memory Lab", page_icon="🧠", layout="centered")
 # Apply central theme (Purple for Memory Lab)
 st.markdown("<style>:root {--accent: #8B5CF6;}</style>", unsafe_allow_html=True)
 
+
 # 2. Initialize Core Services
 @st.cache_resource
 def get_services():
     return build_memory_graph(), FeedbackDB()
+
 
 graph, feedback_db = get_services()
 
@@ -27,7 +30,9 @@ if "user_id" not in st.session_state:
     st.session_state.user_id = "user_alpha_01"
 
 st.title("🧠 Memory Lab")
-st.markdown("Chat with the personalized agent. Try stating facts like *'I love playing guitar'* or *'My favorite color is blue'*, then ask it later to test its memory!")
+st.markdown(
+    "Chat with the personalized agent. Try stating facts like *'I love playing guitar'* or *'My favorite color is blue'*, then ask it later to test its memory!"
+)
 
 # LangGraph configuration requiring the thread_id for short-term memory mapping
 config = {"configurable": {"thread_id": st.session_state.session_id}}
@@ -46,19 +51,19 @@ for msg in messages:
 if prompt := st.chat_input("Tell me something about yourself..."):
     # Display the new user message
     st.chat_message("user").write(prompt)
-    
+
     with st.spinner("Thinking and retrieving memories from ChromaDB..."):
         # Send message to LangGraph
         initial_state = {
-            "messages": [HumanMessage(content=prompt)], 
-            "user_id": st.session_state.user_id
+            "messages": [HumanMessage(content=prompt)],
+            "user_id": st.session_state.user_id,
         }
         result = graph.invoke(initial_state, config=config)
-        
+
         # Extract and display the AI response
         ai_msg = result["messages"][-1].content
         st.chat_message("assistant").write(ai_msg)
-        
+
         # Temporarily store the last interaction for the feedback buttons
         st.session_state.last_user_msg = prompt
         st.session_state.last_ai_msg = ai_msg
@@ -69,15 +74,15 @@ if prompt := st.chat_input("Tell me something about yourself..."):
 if "last_ai_msg" in st.session_state:
     st.markdown("---")
     st.caption("Was the memory retrieval accurate for this response?")
-    
+
     col1, col2, _ = st.columns([1, 1, 4])
     with col1:
         if st.button("👍 Accurate"):
             feedback_db.log_feedback(
-                st.session_state.session_id, 
-                st.session_state.last_user_msg, 
-                st.session_state.last_ai_msg, 
-                1
+                st.session_state.session_id,
+                st.session_state.last_user_msg,
+                st.session_state.last_ai_msg,
+                1,
             )
             del st.session_state.last_user_msg
             del st.session_state.last_ai_msg
@@ -85,10 +90,10 @@ if "last_ai_msg" in st.session_state:
     with col2:
         if st.button("👎 Hallucinated/Forgot"):
             feedback_db.log_feedback(
-                st.session_state.session_id, 
-                st.session_state.last_user_msg, 
-                st.session_state.last_ai_msg, 
-                -1
+                st.session_state.session_id,
+                st.session_state.last_user_msg,
+                st.session_state.last_ai_msg,
+                -1,
             )
             del st.session_state.last_user_msg
             del st.session_state.last_ai_msg

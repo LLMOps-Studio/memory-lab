@@ -1,7 +1,9 @@
-import sqlite3
-import mlflow
 import os
+import sqlite3
 from pathlib import Path
+
+import mlflow
+
 
 def run_feedback_analysis(db_path: str = "feedback.db"):
     """
@@ -14,11 +16,11 @@ def run_feedback_analysis(db_path: str = "feedback.db"):
         return
 
     print("🔍 Analyzing local feedback database...")
-    
+
     # 1. Query SQLite
     with sqlite3.connect(db_file) as conn:
         cursor = conn.cursor()
-        
+
         cursor.execute("SELECT COUNT(*) FROM memory_feedback")
         total_votes = cursor.fetchone()[0]
 
@@ -38,18 +40,20 @@ def run_feedback_analysis(db_path: str = "feedback.db"):
     # 2. Log to Central MLflow Platform
     tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
     experiment_name = os.getenv("MLFLOW_DEFAULT_EXPERIMENT", "memory_lab_feedback")
-    
+
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(experiment_name)
 
     print(f"📡 Connecting to MLflow at {tracking_uri}...")
     with mlflow.start_run(run_name="weekly_memory_performance"):
-        mlflow.log_metrics({
-            "total_feedback_count": total_votes,
-            "positive_feedback_count": positive_votes,
-            "negative_feedback_count": negative_votes,
-            "positive_feedback_rate": positive_rate
-        })
+        mlflow.log_metrics(
+            {
+                "total_feedback_count": total_votes,
+                "positive_feedback_count": positive_votes,
+                "negative_feedback_count": negative_votes,
+                "positive_feedback_rate": positive_rate,
+            }
+        )
 
     # 3. Output Results
     print("\n📊 Memory System Performance Report")
@@ -60,6 +64,7 @@ def run_feedback_analysis(db_path: str = "feedback.db"):
     print(f"Success Rate       : {positive_rate * 100:.1f}%")
     print("-" * 35)
     print("✅ Metrics successfully committed to MLflow!")
+
 
 if __name__ == "__main__":
     run_feedback_analysis()

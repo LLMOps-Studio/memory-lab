@@ -15,7 +15,7 @@ permissions:
 
 env:
   # Yeni lab bir org altına taşınırsa (ör. llmops-labs) bu satırı güncelle.
-  LLMOPS_COMMON_REPO: Muhammet Ali Varlik/llmops-common
+  LLMOPS_COMMON_REPO: LLMOps-Studio/llmops-common
 
 jobs:
   lint-and-test:
