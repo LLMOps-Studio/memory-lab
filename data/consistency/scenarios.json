@@ -1,0 +1,50 @@
+[
+  {
+    "name": "name_recall",
+    "user_id": "consistency_user_name",
+    "turns": [
+      {
+        "message": "Hi there! My name is Elena and I just moved to this city."
+      },
+      {
+        "message": "What's a good way to relax after a long day at work?"
+      },
+      {
+        "message": "Quick check -- can you remind me what my name is?",
+        "expected_facts": ["Elena"]
+      }
+    ]
+  },
+  {
+    "name": "location_recall",
+    "user_id": "consistency_user_location",
+    "turns": [
+      {
+        "message": "I live in Kyoto, it's such a beautiful city in the autumn."
+      },
+      {
+        "message": "What's your favorite season and why?"
+      },
+      {
+        "message": "Where did I say I live?",
+        "expected_facts": ["Kyoto"]
+      }
+    ]
+  },
+  {
+    "name": "favorite_hobby_recall",
+    "user_id": "consistency_user_hobby",
+    "turns": [
+      {
+        "message": "My favorite hobby is painting watercolors on weekends."
+      },
+      {
+        "message": "Tell me an interesting fact about space."
+      },
+      {
+        "message": "What did I say my favorite hobby was?",
+        "expected_facts": ["watercolor", "painting"]
+      }
+    ]
+  }
+]
